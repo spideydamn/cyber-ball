@@ -5,14 +5,21 @@ import sys
 import sqlite3
 
 
+def resource_path(relative):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(relative)
+
+
 FPS = 60
 
 pygame.init()
+pygame.display.set_caption("CyberBall")
 size = WIDTH, HEIGHT = 780, 780
 screen = pygame.display.set_mode(size)
 
 
-con = sqlite3.connect("data/DB.db")
+con = sqlite3.connect(resource_path(os.path.join('data', 'DB.db')))
 cur = con.cursor()
 
 GLOBAL_SCORE = cur.execute("""SELECT score FROM score""").fetchall()[0][0]
@@ -33,19 +40,19 @@ panel_images = list()
 pygame.mixer.pre_init(44100, 16, 2, 4096)
 
 sound_effects = dict(
-    brick_hit=pygame.mixer.Sound('sound_effects/brick_hit.wav'),
-    effect_done=pygame.mixer.Sound('sound_effects/effect_done.wav'),
-    paddle_hit=pygame.mixer.Sound('sound_effects/paddle_hit.wav'),
-    win=pygame.mixer.Sound('sound_effects/win.wav'),
-    game_over=pygame.mixer.Sound('sound_effects/game_over.wav'),
-    live=pygame.mixer.Sound('sound_effects/live.wav'),
+    brick_hit=pygame.mixer.Sound(resource_path(os.path.join('sound_effects', 'brick_hit.wav'))),
+    effect_done=pygame.mixer.Sound(resource_path(os.path.join('sound_effects', 'effect_done.wav'))),
+    paddle_hit=pygame.mixer.Sound(resource_path(os.path.join('sound_effects', 'paddle_hit.wav'))),
+    win=pygame.mixer.Sound(resource_path(os.path.join('sound_effects', 'win.wav'))),
+    game_over=pygame.mixer.Sound(resource_path(os.path.join('sound_effects', 'game_over.wav'))),
+    live=pygame.mixer.Sound(resource_path(os.path.join('sound_effects', 'live.wav'))),
 )
 
-music = pygame.mixer.music.load('sound_effects/music.mp3')
+music = pygame.mixer.music.load(resource_path(os.path.join('sound_effects', 'music.mp3')))
 pygame.mixer.music.play(-1, 0.0)
 
 def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
+    fullname = resource_path(os.path.join('data', name))
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
@@ -61,8 +68,7 @@ def load_image(name, colorkey=None):
 
 
 def load_level(filename):
-    filename = "data/" + filename
-    with open(filename, 'r') as mapFile:
+    with open(resource_path(os.path.join('data', filename)), 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
     max_width = max(map(len, level_map))
     return list(map(lambda x: list(x.ljust(max_width, '.')), level_map))
@@ -150,7 +156,7 @@ def start_screen():
         cur.execute("""UPDATE score SET score = ?""", (GLOBAL_SCORE,))
         con.commit()
 
-        font = pygame.font.Font('data/Pixon.ttf', 50)
+        font = pygame.font.Font(resource_path(os.path.join('data', 'Pixon.ttf')), 50)
         string_rendered = font.render(str(GLOBAL_SCORE), True, pygame.Color('white'))
         screen.blit(string_rendered,
                     (WIDTH - string_rendered.get_rect()[2] - 10, HEIGHT - string_rendered.get_rect()[3]))
@@ -274,7 +280,7 @@ def play():
         if count_stars % 6 == 0:
             stars_sprites.update()
 
-        font = pygame.font.Font('data/Pixon.ttf', 42)
+        font = pygame.font.Font(resource_path(os.path.join('data', 'Pixon.ttf')), 42)
         string_rendered = font.render(str(local_score), True, pygame.Color('white'))
         screen.blit(string_rendered,
                     (WIDTH - string_rendered.get_rect()[2] - 5, HEIGHT - string_rendered.get_rect()[3]))
@@ -371,7 +377,7 @@ def change_level():
             cards_list[j].rect = cards_list[j].image.get_rect()
             cards_list[j].rect.topleft = ((j % 3) * cards_list[j].rect[2] + (WIDTH - cards_list[j].rect[2] * 3) // 2,
                                           (j // 3) * cards_list[j].rect[3] + (HEIGHT - cards_list[j].rect[3] * 1) // 2)
-            font = pygame.font.Font('data/Pixon.ttf', 24 - (j // 3) * 5)
+            font = pygame.font.Font(resource_path(os.path.join('data', 'Pixon.ttf')), 24 - (j // 3) * 5)
             string_rendered = font.render(str(data[j][1]), True, pygame.Color('white'))
             cost = pygame.sprite.Sprite(cards)
             cost.image = string_rendered
@@ -386,7 +392,7 @@ def change_level():
             cards_list[j].rect = cards_list[j].image.get_rect()
             cards_list[j].rect.topleft = ((j % 3) * cards_list[j].rect[2] + (WIDTH - cards_list[j].rect[2] * 3) // 2,
                                           (j // 3) * cards_list[j].rect[3] + (HEIGHT - cards_list[j].rect[3] * 1) // 2)
-            font = pygame.font.Font('data/Pixon.ttf', 24 - (j // 3) * 5)
+            font = pygame.font.Font(resource_path(os.path.join('data', 'Pixon.ttf')), 24 - (j // 3) * 5)
             string_rendered = font.render(str(data[j][1]), True, pygame.Color('white'))
             cost = pygame.sprite.Sprite(cards)
             cost.image = string_rendered
@@ -401,7 +407,7 @@ def change_level():
             cards_list[j].rect = cards_list[j].image.get_rect()
             cards_list[j].rect.topleft = ((j % 3) * cards_list[j].rect[2] + (WIDTH - cards_list[j].rect[2] * 3) // 2,
                                           (j // 3) * cards_list[j].rect[3] + (HEIGHT - cards_list[j].rect[3] * 1) // 2)
-            font = pygame.font.Font('data/Pixon.ttf', 24 - (j // 3) * 5)
+            font = pygame.font.Font(resource_path(os.path.join('data', 'Pixon.ttf')), 24 - (j // 3) * 5)
             string_rendered = font.render(str(data[j][1]), True, pygame.Color('white'))
             cost = pygame.sprite.Sprite(cards)
             cost.image = string_rendered
@@ -523,7 +529,7 @@ def change_level():
         if count_stars % 6 == 0:
             stars_sprites.update()
 
-        font = pygame.font.Font('data/Pixon.ttf', 42)
+        font = pygame.font.Font(resource_path(os.path.join('data', 'Pixon.ttf')), 42)
         string_rendered = font.render(str(GLOBAL_SCORE), True, pygame.Color('white'))
         screen.blit(string_rendered, (
             int(WIDTH / 2 - (string_rendered.get_rect()[2] + score_change_ball.rect[2] + 10) / 2) +
@@ -560,7 +566,7 @@ def change_ball():
             cards_list[j].rect = cards_list[j].image.get_rect()
             cards_list[j].rect.topleft = ((j % 6) * cards_list[j].rect[2] + (WIDTH - cards_list[j].rect[2] * 6) // 2,
                                           (j // 6) * cards_list[j].rect[3] + (HEIGHT - cards_list[j].rect[3] * 4) // 2)
-            font = pygame.font.Font('data/Pixon.ttf', 34 - (j // 6) * 5)
+            font = pygame.font.Font(resource_path(os.path.join('data', 'Pixon.ttf')), 34 - (j // 6) * 5)
             string_rendered = font.render(str(data[j][3]), True, pygame.Color('white'))
             cost = pygame.sprite.Sprite(cards)
             cost.image = string_rendered
@@ -581,7 +587,7 @@ def change_ball():
             cards_list[j].rect = cards_list[j].image.get_rect()
             cards_list[j].rect.topleft = ((j % 6) * cards_list[j].rect[2] + (WIDTH - cards_list[j].rect[2] * 6) // 2,
                                           (j // 6) * cards_list[j].rect[3] + (HEIGHT - cards_list[j].rect[3] * 4) // 2)
-            font = pygame.font.Font('data/Pixon.ttf', 34 - (j // 6) * 5)
+            font = pygame.font.Font(resource_path(os.path.join('data', 'Pixon.ttf')), 34 - (j // 6) * 5)
             string_rendered = font.render(str(data[j][3]), True, pygame.Color('white'))
             cost = pygame.sprite.Sprite(cards)
             cost.image = string_rendered
@@ -603,7 +609,7 @@ def change_ball():
             cards_list[j].rect = cards_list[j].image.get_rect()
             cards_list[j].rect.topleft = ((j % 6) * cards_list[j].rect[2] + (WIDTH - cards_list[j].rect[2] * 6) // 2,
                                           (j // 6) * cards_list[j].rect[3] + (HEIGHT - cards_list[j].rect[3] * 4) // 2)
-            font = pygame.font.Font('data/Pixon.ttf', 34 - (j // 6) * 5)
+            font = pygame.font.Font(resource_path(os.path.join('data', 'Pixon.ttf')), 34 - (j // 6) * 5)
             string_rendered = font.render(str(data[j][3]), True, pygame.Color('white'))
             cost = pygame.sprite.Sprite(cards)
             cost.image = string_rendered
@@ -729,7 +735,7 @@ def change_ball():
         if count_stars % 6 == 0:
             stars_sprites.update()
 
-        font = pygame.font.Font('data/Pixon.ttf', 42)
+        font = pygame.font.Font(resource_path(os.path.join('data', 'Pixon.ttf')), 42)
         string_rendered = font.render(str(GLOBAL_SCORE), True, pygame.Color('white'))
         screen.blit(string_rendered, (
         int(WIDTH / 2 - (string_rendered.get_rect()[2] + score_change_ball.rect[2] + 10) / 2) + score_change_ball.rect[
@@ -824,7 +830,8 @@ class Ball(pygame.sprite.Sprite):
             self.vy = -self.vy
         if pygame.sprite.spritecollideany(self, vertical_borders):
             self.vx = -self.vx
-        if pygame.sprite.spritecollideany(self, panel_sprite) and self.intersect(panel) == "top" or self.intersect(panel) == "bottom":
+        if pygame.sprite.spritecollideany(self, panel_sprite) and self.intersect(panel) == "top" or \
+                self.intersect(panel) == "bottom":
             sound_effects['paddle_hit'].play()
             self.vy = -self.vy
             if left_flag:
@@ -978,6 +985,9 @@ class Brick(pygame.sprite.Sprite):
 if __name__ == '__main__':
 
     clock = pygame.time.Clock()
+
+    icon = load_image('icon.png')
+    pygame.display.set_icon(icon)
 
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
